@@ -1,4 +1,4 @@
-package lx09.complex1
+package lx09.complex
 
 import scala.math._
 

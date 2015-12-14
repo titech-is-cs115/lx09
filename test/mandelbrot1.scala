@@ -1,69 +1,58 @@
-package lx09.mandelbrot1
+package lx09.mandelbrot
 
 import org.scalatest._
 
-import scala.util.Random._
-import lx09.complex1.Complex
+import scala.util.Random.nextInt
+import lx09.complex.Complex
 
-class Test extends FlatSpec with Matchers {
+class Test1 extends FlatSpec with Matchers {
 
-  //println(f"w: ${lx09.mandelbrot1.Model.w}")
+  import Model._
 
-  def rClick = Model.complex(nextInt(500), nextInt(500))
+  def rClick(h: History) = complex(h, nextInt(W), nextInt(H))
 
-  type State = (Model.History, Int)
-  def history(s: State) = s._1
-  def hp(s: State) = s._2
+  def D(h: History) = subRegion(h, rClick(h), rClick(h))
+  def B(h: History) = backward(h)._1
+  def F(h: History) = forward (h)._1
 
-  def D(s: State) = Model.freshImageBehavior(history(s), hp(s), rClick, rClick)
-  def B(s: State) = (s._1, Model.backwardBehavior(s._1, s._2)._1)
-  def F(s: State) = (s._1, Model.forwardBehavior (s._1, s._2)._1)
+  def T(label: String, h: History, size: Int, pos: Int) {
+    (label + "'s size") should ("be " + size) in {
+      h._1.length should be (size)
+    }
 
-  def test(s: State, l: Int, d: Int) {
-    val history = s._1
-    val hp = s._2
-    history.length should be (l)
-    hp should be (d)
+    ("The pos to the current region of " + label) should ("be " + pos) in {
+      h._2 should be (pos)
+    }
   }
 
-  val s: State = (List((new Complex(-2, -2), new Complex(2, 2))), 0)
-  "Initial state" should "be [_]" in {
-    test(s, 1, 0)
-    test(B(s), 1, 0)
-    test(F(s), 1, 0)
-  }
+  val h0: History = history
+  T("h0",    h0,    1, 0)
+  T("B(h0)", B(h0), 1, 0)
+  T("F(h0)", F(h0), 1, 0)
 
-  val sD = D(s)
-  "sD state" should "be [A]_" in {
-    test(sD, 2, 0)
-    test(F(sD), 2, 0)
-    test(B(sD), 2, 1) // A[_]
-  }
+  val hD = D(h0)
+  T("hD",    hD,    2, 0)
+  T("F(hD)", F(hD), 2, 0)
+  T("B(hD)", B(hD), 2, 1)
 
-  val sDD = D(sD)
-  "sDD state" should "be [a]A_" in {
-    test(sDD,       3, 0)
-    test(F(sDD),    3, 0)
-    test(B(sDD),    3, 1)    // a[A]_
-    test(B(B(sDD)), 3, 2)    // aA[_]
-    test(B(B(B(sDD))), 3, 2) // aA[_]
-  }
+  val hDD = D(hD)
+  T("hDD",          hDD,          3, 0)
+  T("F(hDD)",       F(hDD),       3, 0)
+  T("B(hDD)",       B(hDD),       3, 1)
+  T("B(B(hDD))",    B(B(hDD)),    3, 2)
+  T("B(B(B(hDD)))", B(B(B(hDD))), 3, 2)
 
-  val sDDB = B(sDD)
-  "sDDB state" should "be a[A]_" in {
-    test(sDDB, 3, 1)
-    test(F(sDDB), 3, 0)    // [a]A_
-    test(F(F(sDDB)), 3, 0) // [a]A_
-    test(B(sDDB), 3, 2)    // aA[_]
-    test(B(B(sDDB)), 3, 2) // aA[_]
-  }
+  val hDDB = B(hDD)
+  T("hDDB",       hDDB,       3, 1)
+  T("F(hDDB)",    F(hDDB),    3, 0)
+  T("F(F(hDDB))", F(F(hDDB)), 3, 0)
+  T("B(hDDB)",    B(hDDB),    3, 2)
+  T("B(B(hDDB))", B(B(hDDB)), 3, 2)
 
-  val sDDBD = D(sDDB) // b[A]_
-  "sDDBD state" should "be [b]A_" in {
-    test(sDDBD, 3, 0)
-    test(F(sDDBD), 3, 0)       // [b]A_
-    test(B(sDDBD), 3, 1)       // b[A]_
-    test(B(B(sDDBD)), 3, 2)    // bA[_]
-    test(B(B(B(sDDBD))), 3, 2) // bA[_]
-  }
+  val hDDBD = D(hDDB)
+  T("hDDBD",          hDDBD,          3, 0)
+  T("F(hDDBD)",       F(hDDBD),       3, 0)
+  T("B(hDDBD)",       B(hDDBD),       3, 1)
+  T("B(B(hDDBD))",    B(B(hDDBD)),    3, 2)
+  T("B(B(B(hDDBD)))", B(B(B(hDDBD))), 3, 2)
 }
