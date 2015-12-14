@@ -62,11 +62,8 @@ class Test3 extends FlatSpec with Matchers {
   T(B(B(B(specDD))), "__X")
 
   val specDDB: Spec = B(specDD)
-  T(specDDB,         "_X_")
   T(F(specDDB),      "X__")
   T(F(F(specDDB)),   "X__")
-  T(B(specDDB),      "_X_")
-  T(B(B(specDDB)),   "__X")
 
   val specDDBD: Spec = D(specDDB)
   T(specDDBD,          "X__")
