@@ -34,7 +34,9 @@ object Model {
 
   def complex(h: History, x: Double, y: Double): Complex = {
     currentRegion(h) match { case (c1, c2) =>
-      new Complex((c1.re * (W - x) + c2.re * x) / W, (c1.im * (H - y) + c2.im * y) / H)
+      val re = (c1.re * (W - x) + c2.re * x) / W
+      val im = (c1.im * (H - y) + c2.im * y) / H
+      new Complex(re, im)
     }
   }
 
@@ -44,10 +46,17 @@ object Model {
   def onDragFinish(e: MouseEvent) { update(subRegion(history, p1, complex(history, e.x, e.y))) }
 
   def subRegion(h: History, p1: Complex, p2: Complex) = {
-    val size = max(abs(p2.re - p1.re), abs(p2.im - p1.im))
-    val c1 = new Complex((p1.re + p2.re - size) / 2, (p1.im + p2.im - size) / 2)
-    val c2 = new Complex((p1.re + p2.re + size) / 2, (p1.im + p2.im + size) / 2)
-    ((c1, c2) :: dropToCurrent(h), 0)
+    currentRegion(h) match { case (c1, c2) =>
+      val size = max(abs(p2.re - p1.re), abs(p2.im - p1.im))
+      val _re1 = (p1.re + p2.re - size) / 2
+      val _im1 = (p1.im + p2.im - size) / 2
+
+      val re1 = min(max(c1.re, _re1), c2.re - size)
+      val im1 = min(max(c1.im, _im1), c2.im - size)
+
+      ((new Complex(re1, im1), new Complex(re1 + size, im1 + size)) ::
+        dropToCurrent(h), 0)
+    }
   }
 
   def onQuit() {

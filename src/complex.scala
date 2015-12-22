@@ -24,8 +24,8 @@ class Complex(_re: Double, _im: Double) {
   def -(c: Complex) = minus(c)
   def -(x: Double)  = new Complex(re - x, im)
 
-  def ==(c: Complex) = re == c.re && im == c.im
-  def ==(x: Double): Boolean = this==(new Complex(x, 0))
+  def equals(c: Complex) = re == c.re && im == c.im
+  def equals(x: Double): Boolean = this==(new Complex(x, 0))
 
   def unary_- = neg
 
